@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import { RequestWithUser } from "../types/types";
 
 const signUp = asyncHandler(async (req, res) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password, role, ethereum_address } = req.body;
   if (!username || !email || !password) {
     res.status(400);
     throw new Error("Missing username, email, or password");
@@ -16,6 +16,7 @@ const signUp = asyncHandler(async (req, res) => {
     email,
     password,
     role,
+    ethereum_address,
   });
   const savedUser = await newUser.save();
   res.status(200).json({ message: "Sign up successful" });

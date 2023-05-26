@@ -3,6 +3,11 @@ import bcrypt from "bcryptjs";
 
 const { Schema } = mongoose;
 
+const validateEthereumAddress = (address: string) => {
+  const ethereumAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
+  return ethereumAddressRegex.test(address);
+};
+
 const UserSchema = new Schema({
   username: {
     type: String,
@@ -32,6 +37,13 @@ const UserSchema = new Schema({
     type: String,
     enum: ["admin", "user"],
     default: "user",
+  },
+  ethereum_address: {
+    type: String,
+    validate: {
+      validator: validateEthereumAddress,
+      message: "Please provide a valid Ethereum address",
+    },
   },
 });
 
