@@ -9,7 +9,7 @@ const signUp = asyncHandler(async (req, res) => {
   const { username, email, password, role } = req.body;
   if (!username || !email || !password) {
     res.status(400);
-    throw new Error("Missing info");
+    throw new Error("Missing username, email, or password");
   }
   const newUser = new User({
     username,
@@ -18,20 +18,20 @@ const signUp = asyncHandler(async (req, res) => {
     role,
   });
   const savedUser = await newUser.save();
-  res.status(200).json({ message: "signed up" });
+  res.status(200).json({ message: "Sign up successful" });
 });
 
 const logIn = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !email) {
+  if (!email || !password) {
     res.status(400);
-    throw new Error("Missing info");
+    throw new Error("Missing email or password");
   }
 
   const user = await User.findOne({ email });
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
-    res.status(400);
+    res.status(401);
     throw new Error("Wrong login info");
   }
 
@@ -66,19 +66,25 @@ const updateUserInfo = async (req: RequestWithUser, res: Response) => {
     throw new Error("Something went wrong");
   }
 };
-const deleteUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id);
-  if (!user) {
-    res.status(400);
-    throw new Error("No user");
+const deleteUser = async (req: RequestWithUser, res: Response) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(400);
+      throw new Error("No user");
+    }
+    await User.findByIdAndDelete(req.user._id);
+    res.status(200).json({ message: "Account deleted" });
+  } catch (error) {
+    console.log(error);
+    res.status(500);
+    throw new Error("Something went wrong");
   }
-  await User.findByIdAndDelete(req.user._id);
-  res.status(200).json({ message: "Account deleted" });
-});
+};
 
 const viewUsers = asyncHandler(async (req, res) => {
   const users = await User.find();
-  res.status(200).json(users);
+  res.status(200).json({ data: users });
 });
 
 export { signUp, logIn, updateUserInfo, deleteUser, viewUsers };
