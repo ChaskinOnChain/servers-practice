@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel";
 import bcrypt from "bcryptjs";
+import { RequestWithUser } from "../types/types";
 
 const signUp = asyncHandler(async (req, res) => {
   const { username, email, password, role } = req.body;
@@ -41,25 +42,30 @@ const logIn = asyncHandler(async (req, res) => {
   res.status(200).json({ token });
 });
 
-const updateUserInfo = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body;
-  if (!username && !email && !password) {
-    res.status(400);
-    throw new Error("Nothing to update");
-  }
-  const user = await User.findById(req.user._id);
+const updateUserInfo = async (req: RequestWithUser, res: Response) => {
+  try {
+    const { username, email, password } = req.body;
+    if (!username && !email && !password) {
+      res.status(400);
+      throw new Error("Nothing to update");
+    }
+    const user = await User.findById(req.user._id);
 
-  if (!user) {
-    res.status(400);
-    throw new Error("No user");
+    if (!user) {
+      res.status(400);
+      throw new Error("No user");
+    }
+    user.username = username || user.username;
+    user.email = email || user.email;
+    user.password = password || user.password;
+    await user.save();
+    res.status(200).json({ message: "Info updated" });
+  } catch (error) {
+    console.log(error);
+    res.status(500);
+    throw new Error("Something went wrong");
   }
-  user.username = username || user.username;
-  user.email = email || user.email;
-  user.password = password || user.password;
-  await user.save();
-  res.status(200).json({ message: "Info updated" });
-});
-
+};
 const deleteUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   if (!user) {

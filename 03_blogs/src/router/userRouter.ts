@@ -8,6 +8,7 @@ import {
 } from "../controllers/userControllers";
 import verifyJWT from "../middleware/verifyJWT";
 import verifyAdmin from "../middleware/verifyAdmin";
+import { deletePostOrComment } from "../controllers/blogControllers";
 
 const userRouter = express.Router();
 
@@ -21,5 +22,8 @@ userRouter
 const adminRouter = express.Router();
 
 adminRouter.route("/").get(verifyJWT, verifyAdmin, viewUsers);
+adminRouter
+  .route("/blog/:id")
+  .delete(verifyJWT, verifyAdmin, deletePostOrComment);
 
 export { userRouter, adminRouter };

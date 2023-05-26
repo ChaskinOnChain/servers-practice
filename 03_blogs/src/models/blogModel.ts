@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const { Schema } = mongoose;
 
@@ -15,5 +16,9 @@ const BlogSchema = new Schema({
   tags: [String],
   comments: [commentSchema],
 });
+
+BlogSchema.index({ title: "text", tags: "text" });
+
+BlogSchema.plugin(mongoosePaginate);
 
 export default mongoose.model("Blog", BlogSchema);
